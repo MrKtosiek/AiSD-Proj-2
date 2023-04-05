@@ -1,8 +1,8 @@
 ﻿  Main.cpp
-D:\Studia\AiSD\Proj2\Map.h(11,24): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\Proj2\Main.cpp(59,70): warning C4838: conversion from 'size_t' to 'int' requires a narrowing conversion
-D:\Studia\AiSD\Proj2\Main.cpp(163,20): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\Proj2\Main.cpp(166,21): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\Proj2\Position.h(30): warning C4715: 'Position::GetNeighbor8Way': not all control paths return a value
-D:\Studia\AiSD\Proj2\Position.h(39): warning C4715: 'Position::GetNeighbor4Way': not all control paths return a value
-  Proj2.vcxproj -> D:\Studia\AiSD\Proj2\Debug\Proj2.exe
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Map.h(11,24): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(59,70): warning C4838: conversion from 'size_t' to 'int' requires a narrowing conversion
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(209,20): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(212,21): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Position.h(30): warning C4715: 'Position::GetNeighbor8Way': not all control paths return a value
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Position.h(39): warning C4715: 'Position::GetNeighbor4Way': not all control paths return a value
+  Proj2.vcxproj -> D:\Studia\AiSD\AiSD-Proj-2\Proj2\Debug\Proj2.exe

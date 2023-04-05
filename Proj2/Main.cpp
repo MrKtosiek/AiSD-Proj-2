@@ -105,6 +105,18 @@ City* FindCityByPos(const Vector<City>& cities, const Position& pos)
 	return nullptr;
 }
 
+City* FindCityByName(const Vector<City>& cities, const String& name)
+{
+	for (size_t i = 0; i < cities.GetLength(); i++)
+	{
+		if (name == cities[i].name)
+		{
+			return &(cities[i]);
+		}
+	}
+	return nullptr;
+}
+
 
 void CheckConnections(Map& map, Vector<City>& cities, City& city)
 {
@@ -149,16 +161,47 @@ void CreateGraph(Map& map, Vector<City>& cities)
 }
 
 
+void ReadAirlines(Vector<City>& cities)
+{
+	int airlineCount;
+	cin >> airlineCount;
+
+	for (int i = 0; i < airlineCount; i++)
+	{
+		String source;
+		String target;
+		int length;
+
+		cin >> source;
+		cin >> target;
+		cin >> length;
+
+		cout << "source: " << source << endl;
+		cout << "target: " << target << endl;
+		cout << "length: " << length << endl;
+
+		City* city = FindCityByName(cities, source);
+		if (city != nullptr)
+			city->connections.Append({ FindCityByName(cities, target), length });
+	}
+}
+
+
+
+
 int main()
 {
 	Map map;
 	Vector<City> cities;
+
 
 	ReadMap(map);
 
 	ReadCities(map, cities);
 
 	CreateGraph(map, cities);
+
+	ReadAirlines(cities);
 
 	for (int i = 0; i < cities.GetLength(); i++)
 	{

@@ -115,4 +115,16 @@ public:
 		ostr << str.chars;
 		return ostr;
 	}
+	friend std::istream& operator>>(std::istream& istr, String& str)
+	{
+		char c;
+		istr >>	std::ws;
+		while (!isspace(istr.peek()))
+		{
+			istr >> c;
+			str.Append(c);
+		}
+		str.Append('\0');
+		return istr;
+	}
 };
