@@ -5,7 +5,7 @@ class String
 {
 private:
 	size_t length = 0;
-	size_t capacity = 1;
+	size_t capacity = 8;
 	char* chars = nullptr;
 
 public:
@@ -64,7 +64,11 @@ public:
 
 		chars[length - 1] = c;
 	}
-	
+
+	char& operator[](size_t index) const
+	{
+		return chars[index];
+	}
 	bool operator==(const String& other) const
 	{
 		if (length != other.length)

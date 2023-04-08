@@ -1,11 +1,13 @@
 #include <iostream>
 #include "Vector.h"
 #include "Queue.h"
+#include "HashMap.h"
 #include "Position.h"
 #include "City.h"
 #include "Map.h"
 
 using namespace std;
+
 
 
 bool IsAlphanumeric(const char& c)
@@ -31,7 +33,7 @@ void ReadMap(Map& map)
 	}
 }
 
-void ReadCity(Map& map, Vector<City>& cities, Position startPos)
+void ReadCity(Map& map, Vector<City>& cities, HashMap<size_t>& citiesDictionary, Position startPos)
 {
 	City city;
 
@@ -73,9 +75,10 @@ void ReadCity(Map& map, Vector<City>& cities, Position startPos)
 	}
 
 	cities.Append(city);
+	citiesDictionary.Put(city.name, cities.GetLength() - 1);
 }
 
-void ReadCities(Map& map, Vector<City>& cities)
+void ReadCities(Map& map, Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 {
 	for (int x = 0; x < map.size.x; x++)
 	{
@@ -87,7 +90,7 @@ void ReadCities(Map& map, Vector<City>& cities)
 				if (y > 0 && IsAlphanumeric(map.tiles[x][y - 1]))
 					continue;
 
-				ReadCity(map, cities, { x,y });
+				ReadCity(map, cities, citiesDictionary, { x,y });
 			}
 		}
 	}
@@ -106,18 +109,6 @@ size_t FindCityByPos(const Vector<City>& cities, const Position& pos)
 	return -1;
 }
 
-size_t FindCityByName(const Vector<City>& cities, const String& name)
-{
-	for (size_t i = 0; i < cities.GetLength(); i++)
-	{
-		if (name == cities[i].name)
-		{
-			return i;
-		}
-	}
-	return -1;
-}
-
 
 void CheckConnections(Map& map, Vector<City>& cities, City& city)
 {
@@ -127,14 +118,23 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 		int dist;
 	};
 
-	bool** visited = new bool*[map.size.x];
-	for (int i = 0; i < map.size.x; i++)
+	bool canSkip = true;
+	for (size_t i = 0; i < 4; i++)
 	{
-		visited[i] = new bool[map.size.y]();
+		Position neighbor = city.pos.GetNeighbor4Way(i);
+		if (map.Contains(neighbor) && (map[neighbor] == '#' || map[neighbor] == '*'))
+		{
+			canSkip = false;
+			break;
+		}
 	}
+	if (canSkip) return;
+
+	bool** visited = new bool* [map.size.x];
 	bool** toVisit = new bool* [map.size.x];
 	for (int i = 0; i < map.size.x; i++)
 	{
+		visited[i] = new bool[map.size.y]();
 		toVisit[i] = new bool[map.size.y]();
 	}
 
@@ -166,12 +166,24 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 	}
 
 	for (size_t i = 0; i < map.size.x; i++)
+	{
 		delete[] visited[i];
+		delete[] toVisit[i];
+	}
 	delete[] visited;
+	delete[] toVisit;
 }
 
 void CreateGraph(Map& map, Vector<City>& cities)
 {
+	//if (map.size.x == 600 && map.size.y == 2048)
+	//{
+	//	cout << cities.GetLength() << '\n';
+	//	cout << map.tiles[0] << '\n';
+	//	exit(0);
+	//}
+
+
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
 		CheckConnections(map, cities, cities[i]);
@@ -179,7 +191,7 @@ void CreateGraph(Map& map, Vector<City>& cities)
 }
 
 
-void ReadAirlines(Vector<City>& cities)
+void ReadAirlines(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 {
 	int airlineCount;
 	cin >> airlineCount;
@@ -194,10 +206,10 @@ void ReadAirlines(Vector<City>& cities)
 		cin >> target;
 		cin >> length;
 
-		size_t city = FindCityByName(cities, source);
+		size_t city = citiesDictionary.Get(source);
 
 		if (city != -1)
-			cities[city].connections.Append({ FindCityByName(cities, target), length });
+			cities[city].connections.Append({ citiesDictionary.Get(target), length });
 	}
 }
 
@@ -282,7 +294,7 @@ void WritePath(Vector<City>& cities, Vector<int>& path, int dist, bool writeCiti
 	cout << '\n';
 }
 
-void ReadQueries(Vector<City>& cities)
+void ReadQueries(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 {
 	int queryCount;
 	cin >> queryCount;
@@ -298,7 +310,7 @@ void ReadQueries(Vector<City>& cities)
 		cin >> writeCities;
 
 		Vector<int> path;
-		int dist = FindPath(cities, FindCityByName(cities, source), FindCityByName(cities, target), path);
+		int dist = FindPath(cities, citiesDictionary.Get(source), citiesDictionary.Get(target), path);
 
 		WritePath(cities, path, dist, writeCities);
 	}
@@ -309,16 +321,25 @@ void ReadQueries(Vector<City>& cities)
 
 int main()
 {
+	iostream::sync_with_stdio(false);
+	cin.tie(nullptr);
+
 	Map map;
+	HashMap<size_t> citiesDictionary;
 	Vector<City> cities;
 
 	ReadMap(map);
 
-	ReadCities(map, cities);
+	ReadCities(map, cities, citiesDictionary);
 
 	CreateGraph(map, cities);
 
-	ReadAirlines(cities);
+	//if (map.size.x == 600 && map.size.y == 2048)
+	//{
+	//	exit(0);
+	//}
+
+	ReadAirlines(cities, citiesDictionary);
 
 	//for (int i = 0; i < cities.GetLength(); i++)
 	//{
@@ -329,7 +350,7 @@ int main()
 	//	}
 	//}
 
-	ReadQueries(cities);
+	ReadQueries(cities, citiesDictionary);
 
 	return 0;
 }

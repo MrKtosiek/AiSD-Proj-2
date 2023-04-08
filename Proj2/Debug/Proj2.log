@@ -1,8 +1,6 @@
 ﻿  Main.cpp
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(60,70): warning C4838: conversion from 'size_t' to 'int' requires a narrowing conversion
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(62,70): warning C4838: conversion from 'size_t' to 'int' requires a narrowing conversion
 D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(168,23): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(215,27): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(250,12): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(323,20): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(326,21): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(227,27): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(262,12): warning C4018: '<': signed/unsigned mismatch
   Proj2.vcxproj -> D:\Studia\AiSD\AiSD-Proj-2\Proj2\Debug\Proj2.exe
