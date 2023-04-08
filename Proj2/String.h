@@ -124,7 +124,6 @@ public:
 			istr >> c;
 			str.Append(c);
 		}
-		str.Append('\0');
 		return istr;
 	}
 };

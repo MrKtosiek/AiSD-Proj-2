@@ -71,12 +71,21 @@ public:
 		}
 		return false;
 	}
+	size_t IndexOf(const T& element) const
+	{
+		for (size_t i = 0; i < length; i++)
+		{
+			if (arr[i] == element)
+				return i;
+		}
+		return -1;
+	}
 
 	T& operator[](size_t index) const
 	{
 		return arr[index];
 	}
-	Vector<T>& operator=(const Vector<T> other)
+	Vector<T>& operator=(const Vector<T>& other)
 	{
 		Vector<T> tmp(other);
 		length = tmp.length;

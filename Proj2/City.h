@@ -10,7 +10,7 @@ struct City
 
 	struct Connection
 	{
-		City* target;
+		size_t targetIndex;
 		int length;
 	};
 	Vector<Connection> connections;

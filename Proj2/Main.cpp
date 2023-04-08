@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Vector.h"
+#include "Queue.h"
 #include "Position.h"
 #include "City.h"
 #include "Map.h"
@@ -93,28 +94,28 @@ void ReadCities(Map& map, Vector<City>& cities)
 }
 
 
-City* FindCityByPos(const Vector<City>& cities, const Position& pos)
+size_t FindCityByPos(const Vector<City>& cities, const Position& pos)
 {
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
 		if (pos == cities[i].pos)
 		{
-			return &(cities[i]);
+			return i;
 		}
 	}
-	return nullptr;
+	return -1;
 }
 
-City* FindCityByName(const Vector<City>& cities, const String& name)
+size_t FindCityByName(const Vector<City>& cities, const String& name)
 {
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
 		if (name == cities[i].name)
 		{
-			return &(cities[i]);
+			return i;
 		}
 	}
-	return nullptr;
+	return -1;
 }
 
 
@@ -125,31 +126,48 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 		Position pos;
 		int dist;
 	};
-	Vector<Position> visited;
-	Vector<Tile> toCheck;
-	toCheck.Append({ city.pos, 0 });
+
+	bool** visited = new bool*[map.size.x];
+	for (int i = 0; i < map.size.x; i++)
+	{
+		visited[i] = new bool[map.size.y]();
+	}
+	bool** toVisit = new bool* [map.size.x];
+	for (int i = 0; i < map.size.x; i++)
+	{
+		toVisit[i] = new bool[map.size.y]();
+	}
+
+	Queue<Tile> toCheck;
+	toCheck.Enqueue({ city.pos, 0 });
 	while (toCheck.GetLength() > 0)
 	{
+		Tile curTile;
+		toCheck.Dequeue(curTile);
 		for (size_t i = 0; i < 4; i++)
 		{
-			Position neighbor = toCheck[0].pos.GetNeighbor4Way(i);
-			if (map.Contains(neighbor) && !visited.Contains(neighbor))
+			Position neighbor = curTile.pos.GetNeighbor4Way(i);
+			if (map.Contains(neighbor) && !visited[neighbor.x][neighbor.y])
 			{
-				if (map[neighbor] == '#')
+				if (map[neighbor] == '#' && !toVisit[neighbor.x][neighbor.y])
 				{
-					toCheck.Append({ neighbor, toCheck[0].dist + 1 });
+					toCheck.Enqueue({ neighbor, curTile.dist + 1 });
+					toVisit[neighbor.x][neighbor.y] = true;
 				}
 				else if (map[neighbor] == '*')
 				{
-					City* c = FindCityByPos(cities, neighbor);
-					city.connections.Append({ c, toCheck[0].dist + 1 });
-					visited.Append(neighbor);
+					size_t c = FindCityByPos(cities, neighbor);
+					city.connections.Append({ c, curTile.dist + 1 });
+					visited[neighbor.x][neighbor.y] = true;
 				}
 			}
 		}
-		visited.Append(toCheck[0].pos);
-		toCheck.RemoveAt(0);
+		visited[curTile.pos.x][curTile.pos.y] = true;
 	}
+
+	for (size_t i = 0; i < map.size.x; i++)
+		delete[] visited[i];
+	delete[] visited;
 }
 
 void CreateGraph(Map& map, Vector<City>& cities)
@@ -176,13 +194,113 @@ void ReadAirlines(Vector<City>& cities)
 		cin >> target;
 		cin >> length;
 
-		cout << "source: " << source << endl;
-		cout << "target: " << target << endl;
-		cout << "length: " << length << endl;
+		size_t city = FindCityByName(cities, source);
 
-		City* city = FindCityByName(cities, source);
-		if (city != nullptr)
-			city->connections.Append({ FindCityByName(cities, target), length });
+		if (city != -1)
+			cities[city].connections.Append({ FindCityByName(cities, target), length });
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////
+// PATHFINDING
+
+size_t PopPriorityIndex(Vector<size_t>& queue, const Vector<size_t>& distances)
+{
+	size_t index = 0;
+	size_t queueIndexToRemove = 0;
+	int lowest = INT_MAX;
+	for (size_t i = 0; i < queue.GetLength(); i++)
+	{
+		if (distances[queue[i]] < lowest)
+		{
+			lowest = distances[queue[i]];
+			index = queue[i];
+			queueIndexToRemove = i;
+		}
+	}
+	queue.RemoveAt(queueIndexToRemove);
+	return index;
+}
+
+int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<int>& path)
+{
+	Vector<size_t> queue;
+	Vector<size_t> dist;
+	Vector<size_t> prev;
+	for (size_t i = 0; i < cities.GetLength(); i++)
+	{
+		queue.Append(i);
+		dist.Append(INT_MAX);
+		prev.Append(-1);
+	}
+	dist[source] = 0;
+
+	while (queue.GetLength() > 0)
+	{
+		size_t city = PopPriorityIndex(queue, dist);
+
+		if (city == target)
+			break;
+
+		for (size_t i = 0; i < cities[city].connections.GetLength(); i++)
+		{
+			size_t neighborIndex = cities[city].connections[i].targetIndex;
+			int alt = dist[city] + cities[city].connections[i].length;
+			if (alt < dist[neighborIndex])
+			{
+				dist[neighborIndex] = alt;
+				prev[neighborIndex] = city;
+			}
+		}
+	}
+
+	int curIndex = target;
+	if (prev[curIndex] != -1 || curIndex == source)
+	{
+		while (curIndex != -1)
+		{
+			path.Append(curIndex);
+			curIndex = prev[curIndex];
+		}
+	}
+
+	return dist[target];
+}
+
+void WritePath(Vector<City>& cities, Vector<int>& path, int dist, bool writeCities)
+{
+	cout << dist;
+
+	if (writeCities && path.GetLength() >= 3)
+	{
+		for (size_t i = path.GetLength() - 2; i >= 1; i--)
+		{
+			cout << ' ' << cities[path[i]].name;
+		}
+	}
+	cout << '\n';
+}
+
+void ReadQueries(Vector<City>& cities)
+{
+	int queryCount;
+	cin >> queryCount;
+
+	for (int i = 0; i < queryCount; i++)
+	{
+		String source;
+		String target;
+		bool writeCities;
+
+		cin >> source;
+		cin >> target;
+		cin >> writeCities;
+
+		Vector<int> path;
+		int dist = FindPath(cities, FindCityByName(cities, source), FindCityByName(cities, target), path);
+
+		WritePath(cities, path, dist, writeCities);
 	}
 }
 
@@ -194,7 +312,6 @@ int main()
 	Map map;
 	Vector<City> cities;
 
-
 	ReadMap(map);
 
 	ReadCities(map, cities);
@@ -203,14 +320,16 @@ int main()
 
 	ReadAirlines(cities);
 
-	for (int i = 0; i < cities.GetLength(); i++)
-	{
-		cout << cities[i].name << " (" << cities[i].pos.x << "," << cities[i].pos.y << ")" << endl;
-		for (int j = 0; j < cities[i].connections.GetLength(); j++)
-		{
-			cout << " - " << cities[i].connections[j].target->name << " " << cities[i].connections[j].length << endl;
-		}
-	}
+	//for (int i = 0; i < cities.GetLength(); i++)
+	//{
+	//	cout << cities[i].name << " (" << cities[i].pos.x << "," << cities[i].pos.y << ")" << endl;
+	//	for (int j = 0; j < cities[i].connections.GetLength(); j++)
+	//	{
+	//		cout << " - " << cities[cities[i].connections[j].targetIndex].name << " " << cities[i].connections[j].length << endl;
+	//	}
+	//}
+
+	ReadQueries(cities);
 
 	return 0;
 }
