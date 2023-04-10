@@ -2,6 +2,7 @@
 #include "Vector.h"
 #include "Queue.h"
 #include "HashMap.h"
+#include "PriorityQueue.h"
 #include "Position.h"
 #include "City.h"
 #include "Map.h"
@@ -235,22 +236,25 @@ size_t PopPriorityIndex(Vector<size_t>& queue, const Vector<size_t>& distances)
 	return index;
 }
 
-int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<int>& path)
+int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>& path)
 {
-	Vector<size_t> queue;
+	PriorityQueue<size_t> unvisited;
 	Vector<size_t> dist;
 	Vector<size_t> prev;
+
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
-		queue.Append(i);
-		dist.Append(INT_MAX);
+		if (i != source)
+			dist.Append(INT_MAX);
+		else
+			dist.Append(0);
 		prev.Append(-1);
+		unvisited.Add(i, dist[i]);
 	}
-	dist[source] = 0;
 
-	while (queue.GetLength() > 0)
+	while (unvisited.GetLength() > 0)
 	{
-		size_t city = PopPriorityIndex(queue, dist);
+		size_t city = unvisited.ExtractMin();
 
 		if (city == target)
 			break;
@@ -263,11 +267,12 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<int>& pa
 			{
 				dist[neighborIndex] = alt;
 				prev[neighborIndex] = city;
+				unvisited.DecreasePriority(neighborIndex, alt);
 			}
 		}
 	}
 
-	int curIndex = target;
+	size_t curIndex = target;
 	if (prev[curIndex] != -1 || curIndex == source)
 	{
 		while (curIndex != -1)
@@ -280,7 +285,7 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<int>& pa
 	return dist[target];
 }
 
-void WritePath(Vector<City>& cities, Vector<int>& path, int dist, bool writeCities)
+void WritePath(Vector<City>& cities, Vector<size_t>& path, int dist, bool writeCities)
 {
 	cout << dist;
 
@@ -309,7 +314,7 @@ void ReadQueries(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 		cin >> target;
 		cin >> writeCities;
 
-		Vector<int> path;
+		Vector<size_t> path;
 		int dist = FindPath(cities, citiesDictionary.Get(source), citiesDictionary.Get(target), path);
 
 		WritePath(cities, path, dist, writeCities);
@@ -321,6 +326,43 @@ void ReadQueries(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 
 int main()
 {
+	/*PriorityQueue<int> q;
+	long long int k = 712;
+
+	for (size_t i = 0; i < 1000; i++)
+	{
+		q.Add(k * 12894124 + 88487183, k);
+		k = (401 * k + 417) % 1000;
+		cout << i << ' ' << k << endl;
+		if (!q.VerifyHeap())
+		{
+			cout << "NO HEAP" << endl;
+		}
+	}
+	cout << "Size: " << q.GetLength() << endl;
+	for (size_t i = 0; i < 1000; i++)
+	{
+		int m = q.ExtractMin();
+		if (m == i * 12894124 + 88487183)
+		{
+			cout << i << ' ' << m << endl;
+		}
+		else
+		{
+			cout << i << " error! " << m << endl;
+		}
+		if (!q.VerifyHeap())
+		{
+			cout << "NO HEAP" << endl;
+		}
+	}
+
+
+	return 0;*/
+	
+
+
+
 	iostream::sync_with_stdio(false);
 	cin.tie(nullptr);
 

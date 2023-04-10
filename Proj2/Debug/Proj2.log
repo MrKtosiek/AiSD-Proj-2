@@ -1,6 +1,12 @@
 ﻿  Main.cpp
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(62,70): warning C4838: conversion from 'size_t' to 'int' requires a narrowing conversion
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(168,23): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(227,27): warning C4018: '<': signed/unsigned mismatch
-D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(262,12): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(63,70): warning C4838: conversion from 'size_t' to 'int' requires a narrowing conversion
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(169,23): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(228,27): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(266,12): warning C4018: '<': signed/unsigned mismatch
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(334,34): warning C4244: 'argument': conversion from '__int64' to 'const size_t', possible loss of data
+D:\Studia\AiSD\AiSD-Proj-2\Proj2\Main.cpp(334,22): warning C4244: 'argument': conversion from '__int64' to 'const T', possible loss of data
+          with
+          [
+              T=int
+          ]
   Proj2.vcxproj -> D:\Studia\AiSD\AiSD-Proj-2\Proj2\Debug\Proj2.exe

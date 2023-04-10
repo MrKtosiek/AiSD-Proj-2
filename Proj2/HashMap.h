@@ -42,15 +42,7 @@ public:
 	void Put(const String& key, const V& value)
 	{
 		size_t hash = StringHash(key);
-		if (chains[hash] == nullptr)
-		{
-			chains[hash] = new KeyValuePair(key, value, nullptr);
-		}
-		else
-		{
-			chains[hash] = new KeyValuePair(key, value, chains[hash]);
-		}
-		//chains[StringHash(key)].Append({ key, value });
+		chains[hash] = new KeyValuePair(key, value, chains[hash]);
 	}
 
 	V& Get(const String& key) const
