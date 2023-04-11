@@ -6,7 +6,7 @@
 struct City
 {
 	String name;
-	Position pos;
+	Position pos = {};
 
 	struct Connection
 	{

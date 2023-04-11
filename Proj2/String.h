@@ -5,7 +5,7 @@ class String
 {
 private:
 	size_t length = 0;
-	size_t capacity = 8;
+	size_t capacity = 4;
 	char* chars = nullptr;
 
 public:

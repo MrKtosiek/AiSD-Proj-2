@@ -3,12 +3,12 @@
 
 struct Map
 {
-	Position size = { 0,0 };
+	Position size = {};
 	char** tiles = nullptr;
 
 	~Map()
 	{
-		for (int i = 0; i < size.x; i++)
+		for (size_t i = 0; i < size.x; i++)
 			delete[] tiles[i];
 
 		delete[] tiles;
@@ -18,8 +18,8 @@ struct Map
 	bool Contains(const Position& position) const
 	{
 		return
-			position.x >= 0 && position.x < size.x &&
-			position.y >= 0 && position.y < size.y;
+			position.x < size.x &&
+			position.y < size.y;
 	}
 
 	char& operator[](const Position& pos) const

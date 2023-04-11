@@ -7,9 +7,13 @@
 #include "City.h"
 #include "Map.h"
 
+#include <crtdbg.h>
+
 using namespace std;
 
 
+///////////////////////////////////////////////////////////////////
+// MAP READING
 
 bool IsAlphanumeric(const char& c)
 {
@@ -27,7 +31,7 @@ void ReadMap(Map& map)
 	cin >> ws;
 
 	map.tiles = new char*[map.size.x];
-	for (int i = 0; i < map.size.x; i++)
+	for (size_t i = 0; i < map.size.x; i++)
 	{
 		map.tiles[i] = new char[map.size.y + 1];
 		cin.getline(map.tiles[i], map.size.y + 1);
@@ -81,9 +85,9 @@ void ReadCity(Map& map, Vector<City>& cities, HashMap<size_t>& citiesDictionary,
 
 void ReadCities(Map& map, Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 {
-	for (int x = 0; x < map.size.x; x++)
+	for (size_t x = 0; x < map.size.x; x++)
 	{
-		for (int y = 0; y < map.size.y; y++)
+		for (size_t y = 0; y < map.size.y; y++)
 		{
 			if (IsAlphanumeric(map.tiles[x][y]))
 			{
@@ -98,6 +102,9 @@ void ReadCities(Map& map, Vector<City>& cities, HashMap<size_t>& citiesDictionar
 }
 
 
+///////////////////////////////////////////////////////////////////
+// GRAPH CREATION
+
 size_t FindCityByPos(const Vector<City>& cities, const Position& pos)
 {
 	for (size_t i = 0; i < cities.GetLength(); i++)
@@ -107,7 +114,7 @@ size_t FindCityByPos(const Vector<City>& cities, const Position& pos)
 			return i;
 		}
 	}
-	return -1;
+	return UINT_MAX;
 }
 
 
@@ -133,7 +140,7 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 
 	bool** visited = new bool* [map.size.x];
 	bool** toVisit = new bool* [map.size.x];
-	for (int i = 0; i < map.size.x; i++)
+	for (size_t i = 0; i < map.size.x; i++)
 	{
 		visited[i] = new bool[map.size.y]();
 		toVisit[i] = new bool[map.size.y]();
@@ -177,14 +184,6 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 
 void CreateGraph(Map& map, Vector<City>& cities)
 {
-	//if (map.size.x == 600 && map.size.y == 2048)
-	//{
-	//	cout << cities.GetLength() << '\n';
-	//	cout << map.tiles[0] << '\n';
-	//	exit(0);
-	//}
-
-
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
 		CheckConnections(map, cities, cities[i]);
@@ -199,17 +198,14 @@ void ReadAirlines(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 
 	for (int i = 0; i < airlineCount; i++)
 	{
-		char buffer[100];
+		const size_t bufferSize = 256;
+		char buffer[bufferSize];
 		String source;
 		String target;
 		int length = 0;
 
-		//cin >> source;
-		//cin >> target;
-		//cin >> length;
-
 		cin >> ws;
-		cin.getline(buffer, 100);
+		cin.getline(buffer, bufferSize);
 
 		int c = 0;
 		while (buffer[c] != ' ')
@@ -243,29 +239,13 @@ void ReadAirlines(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 ///////////////////////////////////////////////////////////////////
 // PATHFINDING
 
-size_t PopPriorityIndex(Vector<size_t>& queue, const Vector<size_t>& distances)
-{
-	size_t index = 0;
-	size_t queueIndexToRemove = 0;
-	int lowest = INT_MAX;
-	for (size_t i = 0; i < queue.GetLength(); i++)
-	{
-		if (distances[queue[i]] < lowest)
-		{
-			lowest = distances[queue[i]];
-			index = queue[i];
-			queueIndexToRemove = i;
-		}
-	}
-	queue.RemoveAt(queueIndexToRemove);
-	return index;
-}
-
 int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>& path)
 {
 	PriorityQueue<size_t> unvisited;
 	Vector<size_t> dist;
 	Vector<size_t> prev;
+
+	const size_t invalidIndex = UINT_MAX;
 
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
@@ -273,7 +253,7 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 			dist.Append(INT_MAX);
 		else
 			dist.Append(0);
-		prev.Append(-1);
+		prev.Append(invalidIndex);
 		unvisited.Add(i, dist[i]);
 	}
 
@@ -283,11 +263,11 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 
 		if (city == target)
 			break;
-
+		
 		for (size_t i = 0; i < cities[city].connections.GetLength(); i++)
 		{
 			size_t neighborIndex = cities[city].connections[i].targetIndex;
-			int alt = dist[city] + cities[city].connections[i].length;
+			size_t alt = dist[city] + cities[city].connections[i].length;
 			if (alt < dist[neighborIndex])
 			{
 				dist[neighborIndex] = alt;
@@ -298,9 +278,9 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 	}
 
 	size_t curIndex = target;
-	if (prev[curIndex] != -1 || curIndex == source)
+	if (prev[curIndex] != invalidIndex || curIndex == source)
 	{
-		while (curIndex != -1)
+		while (curIndex != invalidIndex)
 		{
 			path.Append(curIndex);
 			curIndex = prev[curIndex];
@@ -349,45 +329,9 @@ void ReadQueries(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 
 
 
+
 int main()
 {
-	/*PriorityQueue<int> q;
-	long long int k = 712;
-
-	for (size_t i = 0; i < 1000; i++)
-	{
-		q.Add(k * 12894124 + 88487183, k);
-		k = (401 * k + 417) % 1000;
-		cout << i << ' ' << k << endl;
-		if (!q.VerifyHeap())
-		{
-			cout << "NO HEAP" << endl;
-		}
-	}
-	cout << "Size: " << q.GetLength() << endl;
-	for (size_t i = 0; i < 1000; i++)
-	{
-		int m = q.ExtractMin();
-		if (m == i * 12894124 + 88487183)
-		{
-			cout << i << ' ' << m << endl;
-		}
-		else
-		{
-			cout << i << " error! " << m << endl;
-		}
-		if (!q.VerifyHeap())
-		{
-			cout << "NO HEAP" << endl;
-		}
-	}
-
-
-	return 0;*/
-	
-
-
-
 	iostream::sync_with_stdio(false);
 	cin.tie(nullptr);
 
@@ -401,24 +345,7 @@ int main()
 
 	CreateGraph(map, cities);
 
-	//if (map.size.x == 30 && map.size.y == 2048)
-	//{
-	//	int air;
-	//	cin >> air;
-	//	cout << cities.GetLength() << ',' << air;
-	//	exit(0);
-	//}
-
 	ReadAirlines(cities, citiesDictionary);
-
-	//for (int i = 0; i < cities.GetLength(); i++)
-	//{
-	//	cout << cities[i].name << " (" << cities[i].pos.x << "," << cities[i].pos.y << ")" << endl;
-	//	for (int j = 0; j < cities[i].connections.GetLength(); j++)
-	//	{
-	//		cout << " - " << cities[cities[i].connections[j].targetIndex].name << " " << cities[i].connections[j].length << endl;
-	//	}
-	//}
 
 	ReadQueries(cities, citiesDictionary);
 

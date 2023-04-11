@@ -35,20 +35,6 @@ public:
 		return nodes.GetLength();
 	}
 
-
-	bool VerifyHeap()
-	{
-		for (size_t i = 1; i < GetLength(); i++)
-		{
-			if (nodes[Parent(i)].priority > nodes[i].priority)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-
 	void Add(const T& data, const size_t& priority)
 	{
 		nodes.Append({ data, priority });
@@ -71,7 +57,6 @@ public:
 			}
 		}
 	}
-
 	T& ExtractMin()
 	{
 		/*T result = 0;
@@ -118,36 +103,5 @@ public:
 		}
 
 		return nodes[GetLength()].data;
-	}
-
-	// new priority should always be lower than the element's current priority
-	void DecreasePriority(const T& data, const size_t& newPriority)
-	{
-		size_t curNode = 0;
-		for (size_t i = 0; i < nodes.GetLength(); i++)
-		{
-			if (nodes[i].data == data)
-			{
-				nodes[i].priority = newPriority;
-				curNode = i;
-				break;
-			}
-		}
-
-		while (curNode > 0)
-		{
-			size_t parent = Parent(curNode);
-			if (nodes[curNode].priority < nodes[parent].priority)
-			{
-				PriorityNode tmp = nodes[curNode];
-				nodes[curNode] = nodes[parent];
-				nodes[parent] = tmp;
-			}
-			else
-			{
-				break;
-			}
-			curNode = parent;
-		}
 	}
 };

@@ -2,7 +2,7 @@
 
 struct Position
 {
-	int x, y;
+	size_t x, y;
 
 	enum Direction
 	{
@@ -28,7 +28,7 @@ struct Position
 		if (i == 6) return { x + 1, y - 1 };
 		if (i == 7) return { x    , y - 1 };
 
-		return { -1,-1 };
+		return { UINT_MAX,UINT_MAX };
 	}
 
 	// returns one of the 4 neighboring positions, numbered clockwise beginning with the upper one
@@ -39,7 +39,7 @@ struct Position
 		if (i == 2) return { x + 1, y     };
 		if (i == 3) return { x    , y - 1 };
 
-		return { -1,-1 };
+		return { UINT_MAX,UINT_MAX };
 	}
 
 	bool operator==(const Position& other) const
