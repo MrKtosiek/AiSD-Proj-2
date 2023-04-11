@@ -199,13 +199,38 @@ void ReadAirlines(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 
 	for (int i = 0; i < airlineCount; i++)
 	{
+		char buffer[100];
 		String source;
 		String target;
-		int length;
+		int length = 0;
 
-		cin >> source;
-		cin >> target;
-		cin >> length;
+		//cin >> source;
+		//cin >> target;
+		//cin >> length;
+
+		cin >> ws;
+		cin.getline(buffer, 100);
+
+		int c = 0;
+		while (buffer[c] != ' ')
+		{
+			source.Append(buffer[c]);
+			c++;
+		}
+		c++;
+		while (buffer[c] != ' ')
+		{
+			target.Append(buffer[c]);
+			c++;
+		}
+		c++;
+		while (buffer[c] != '\0')
+		{
+			length *= 10;
+			length += buffer[c] - '0';
+			c++;
+		}
+
 
 		size_t city = citiesDictionary.Get(source);
 
@@ -267,7 +292,7 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 			{
 				dist[neighborIndex] = alt;
 				prev[neighborIndex] = city;
-				unvisited.DecreasePriority(neighborIndex, alt);
+				unvisited.Add(neighborIndex, alt);
 			}
 		}
 	}
@@ -376,8 +401,11 @@ int main()
 
 	CreateGraph(map, cities);
 
-	//if (map.size.x == 600 && map.size.y == 2048)
+	//if (map.size.x == 30 && map.size.y == 2048)
 	//{
+	//	int air;
+	//	cin >> air;
+	//	cout << cities.GetLength() << ',' << air;
 	//	exit(0);
 	//}
 
