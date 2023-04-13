@@ -27,9 +27,6 @@ private:
 	}
 
 public:
-	PriorityQueue(){}
-	~PriorityQueue(){}
-
 	size_t GetLength() const
 	{
 		return nodes.GetLength();

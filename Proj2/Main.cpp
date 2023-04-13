@@ -7,8 +7,6 @@
 #include "City.h"
 #include "Map.h"
 
-#include <crtdbg.h>
-
 using namespace std;
 
 
@@ -126,6 +124,7 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 		int dist;
 	};
 
+	// if the city doesn't have any neighboring road or city tiles, don't start the search
 	bool canSkip = true;
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -138,32 +137,37 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 	}
 	if (canSkip) return;
 
+
 	bool** visited = new bool* [map.size.x];
-	bool** toVisit = new bool* [map.size.x];
+	bool** inQueue = new bool* [map.size.x];
 	for (size_t i = 0; i < map.size.x; i++)
 	{
 		visited[i] = new bool[map.size.y]();
-		toVisit[i] = new bool[map.size.y]();
+		inQueue[i] = new bool[map.size.y]();
 	}
 
+
+	// floodfill/BFS from the current city to all neighboring cities
 	Queue<Tile> toCheck;
 	toCheck.Enqueue({ city.pos, 0 });
 	while (toCheck.GetLength() > 0)
 	{
 		Tile curTile;
 		toCheck.Dequeue(curTile);
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < 4; i++) // check all 4 neighbors
 		{
 			Position neighbor = curTile.pos.GetNeighbor4Way(i);
 			if (map.Contains(neighbor) && !visited[neighbor.x][neighbor.y])
 			{
-				if (map[neighbor] == '#' && !toVisit[neighbor.x][neighbor.y])
+				if (map[neighbor] == '#' && !inQueue[neighbor.x][neighbor.y])
 				{
+					// add the neighbor to the queue
 					toCheck.Enqueue({ neighbor, curTile.dist + 1 });
-					toVisit[neighbor.x][neighbor.y] = true;
+					inQueue[neighbor.x][neighbor.y] = true;
 				}
 				else if (map[neighbor] == '*')
 				{
+					// add a connection
 					size_t c = FindCityByPos(cities, neighbor);
 					city.connections.Append({ c, curTile.dist + 1 });
 					visited[neighbor.x][neighbor.y] = true;
@@ -176,10 +180,10 @@ void CheckConnections(Map& map, Vector<City>& cities, City& city)
 	for (size_t i = 0; i < map.size.x; i++)
 	{
 		delete[] visited[i];
-		delete[] toVisit[i];
+		delete[] inQueue[i];
 	}
 	delete[] visited;
-	delete[] toVisit;
+	delete[] inQueue;
 }
 
 void CreateGraph(Map& map, Vector<City>& cities)
@@ -230,8 +234,7 @@ void ReadAirlines(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 
 		size_t city = citiesDictionary.Get(source);
 
-		if (city != -1)
-			cities[city].connections.Append({ citiesDictionary.Get(target), length });
+		cities[city].connections.Append({ citiesDictionary.Get(target), length });
 	}
 }
 
@@ -239,6 +242,7 @@ void ReadAirlines(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 ///////////////////////////////////////////////////////////////////
 // PATHFINDING
 
+// returns the distance to the target and saves all the traversed cities in 'path'
 int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>& path)
 {
 	PriorityQueue<size_t> unvisited;
@@ -247,6 +251,7 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 
 	const size_t invalidIndex = UINT_MAX;
 
+	// fill all the necessary containers
 	for (size_t i = 0; i < cities.GetLength(); i++)
 	{
 		if (i != source)
@@ -257,6 +262,7 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 		unvisited.Add(i, dist[i]);
 	}
 
+	// Dijkstra's algorithm
 	while (unvisited.GetLength() > 0)
 	{
 		size_t city = unvisited.ExtractMin();
@@ -277,6 +283,7 @@ int FindPath(Vector<City>& cities, size_t source, size_t target, Vector<size_t>&
 		}
 	}
 
+	// retrieve the path
 	size_t curIndex = target;
 	if (prev[curIndex] != invalidIndex || curIndex == source)
 	{
@@ -294,6 +301,7 @@ void WritePath(Vector<City>& cities, Vector<size_t>& path, int dist, bool writeC
 {
 	cout << dist;
 
+	// the path includes the source and target, so there are no intermediate cities if the path is shorter than 3
 	if (writeCities && path.GetLength() >= 3)
 	{
 		for (size_t i = path.GetLength() - 2; i >= 1; i--)
@@ -327,9 +335,6 @@ void ReadQueries(Vector<City>& cities, HashMap<size_t>& citiesDictionary)
 }
 
 
-
-
-
 int main()
 {
 	iostream::sync_with_stdio(false);
@@ -339,15 +344,18 @@ int main()
 	HashMap<size_t> citiesDictionary;
 	Vector<City> cities;
 
+	// input
 	ReadMap(map);
-
 	ReadCities(map, cities, citiesDictionary);
-
 	CreateGraph(map, cities);
-
 	ReadAirlines(cities, citiesDictionary);
 
+	// output
 	ReadQueries(cities, citiesDictionary);
+
+	// remove all elements from the dictionary to prevent a memory leak
+	for (size_t i = 0; i < cities.GetLength(); i++)
+		citiesDictionary.Remove(cities[i].name);
 
 	return 0;
 }
